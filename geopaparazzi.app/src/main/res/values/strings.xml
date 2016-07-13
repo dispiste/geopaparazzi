@@ -391,5 +391,14 @@
     <string name="error_while_removing_notes">"An error occurred while deleting the notes: "</string>
     <string name="removing_notes">Removing notes...</string>
     <string name="interrupted_by_user">Interrupted by user</string>
+    <string name="browse_images">Browse images</string>
+    <string name="new_picture">New picture</string>
+    <string name="Images">Images</string>
+
+    <plurals name="n_images">
+        <item quantity="zero">@string/no_images</item>
+        <item quantity="one">1 image</item>
+        <item quantity="other">%d images</item>
+    </plurals>
 
 </resources>
