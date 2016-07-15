@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <string name="app_name">Geopaparazzi</string>
+  <string name="app_name">gvSIG Mobile2</string>
   <string name="action_settings">Configuraciones</string>
   <string name="action_advanced_settings">Avanzado</string>
   <string name="label_green">Verde</string>
