@@ -492,7 +492,7 @@ public enum GeneralQueriesPreparer implements ISpatialiteTableAndFieldsNames {
             // is an invalid record and must be ignored
             sb_query.append(" WHERE (" + METADATA_VECTOR_LAYERS_TABLE_NAME + ".spatial_index_enabled = 1)");
             sb_query.append(" AND (" + METADATA_VECTOR_LAYERS_STATISTICS_TABLE_NAME + ".row_count IS NOT NULL)");
-            sb_query.append(" AND ((" + METADATA_VECTOR_LAYERS_STATISTICS_TABLE_NAME + ".row_count > 0)");
+            sb_query.append(" AND ((" + METADATA_VECTOR_LAYERS_STATISTICS_TABLE_NAME + ".row_count = 0)");
             sb_query.append(" OR ((" + METADATA_VECTOR_LAYERS_STATISTICS_TABLE_NAME + ".extent_min_x IS NOT NULL)");
             sb_query.append(" AND (" + METADATA_VECTOR_LAYERS_STATISTICS_TABLE_NAME + ".extent_min_y IS NOT NULL)");
             sb_query.append(" AND (" + METADATA_VECTOR_LAYERS_STATISTICS_TABLE_NAME + ".extent_max_x IS NOT NULL)");
