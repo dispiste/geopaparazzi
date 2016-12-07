@@ -127,11 +127,18 @@ public class WebDataUploadListActivity extends ListActivity {
                 TextView descrText = (TextView) rowView.findViewById(R.id.descriptiontext);
                 descrText.setText(dataListToLoad.get(position).getParentFile().getAbsolutePath());
 
-                Button uploadButton = (Button) rowView.findViewById(R.id.uploadButton);
+                Button uploadButton = (Button) rowView.findViewById(R.id.uploadFinishButton);
                 uploadButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        upload(position);
+                        upload(position, true);
+                    }
+                });
+                uploadButton = (Button) rowView.findViewById(R.id.uploadContinueButton);
+                uploadButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        upload(position, false);
                     }
                 });
 
@@ -142,11 +149,18 @@ public class WebDataUploadListActivity extends ListActivity {
         setListAdapter(arrayAdapter);
     }
 
-    private void upload(final int position) {
+    private void upload(final int position, final boolean finish) {
         StringAsyncTask task = new StringAsyncTask(this) {
             protected String doBackgroundWork() {
                 try {
-                    String result = WebDataManager.INSTANCE.uploadData(WebDataUploadListActivity.this, dataListToLoad.get(position), url, user, pwd);
+                    String result;
+                    if (finish) {
+                        result = WebDataManager.INSTANCE.uploadData(WebDataUploadListActivity.this, dataListToLoad.get(position), url, user, pwd);
+                        dataListToLoad.get(position).delete();
+                    }
+                    else {
+                        result = WebDataManager.INSTANCE.uploadData(WebDataUploadListActivity.this, dataListToLoad.get(position), url, user, pwd, WebDataManager.UPLOAD_AND_CONTINUE_DATA);
+                    }
                     return result;
                 } catch (Exception e) {
                     return "ERROR: " + e.getLocalizedMessage();
@@ -165,7 +179,5 @@ public class WebDataUploadListActivity extends ListActivity {
         };
         task.setProgressDialog(null, "Uploading data to the cloud...", false, null);
         task.execute();
-
-
     }
 }
