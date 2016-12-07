@@ -156,7 +156,9 @@ public class WebDataUploadListActivity extends ListActivity {
                     String result;
                     if (finish) {
                         result = WebDataManager.INSTANCE.uploadData(WebDataUploadListActivity.this, dataListToLoad.get(position), url, user, pwd);
-                        dataListToLoad.get(position).delete();
+                        // For the moment avoid deleting the db after uploading.
+                        // We would need to remove it from the Map in addition to delete the db
+                        //dataListToLoad.get(position).delete();
                     }
                     else {
                         result = WebDataManager.INSTANCE.uploadData(WebDataUploadListActivity.this, dataListToLoad.get(position), url, user, pwd, WebDataManager.UPLOAD_AND_CONTINUE_DATA);
