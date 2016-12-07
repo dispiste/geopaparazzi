@@ -38,6 +38,7 @@ import eu.geopaparazzi.library.util.TimeUtilities;
 public class ImageUtilities {
     public static final int MAXBLOBSIZE = 1900000;
     public static final int THUMBNAILWIDTH = 100;
+    public static final int IMAGEMAXSIZE= 1024;
 
     public static String getSketchImageName(Date date) {
         if (date == null)
@@ -154,14 +155,27 @@ public class ImageUtilities {
         float sampleSizeF = (float) width / (float) THUMBNAILWIDTH;
         float newHeight = height/sampleSizeF;
         Bitmap thumbnail =  Bitmap.createScaledBitmap(image, THUMBNAILWIDTH, (int)newHeight, false);
-
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 90, stream);
-        byte[] imageBytes = stream.toByteArray();
-
-        stream = new ByteArrayOutputStream();
-        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+        thumbnail.compress(Bitmap.CompressFormat.JPEG, 53, stream);
         byte[] thumbnailBytes = stream.toByteArray();
+        thumbnail.recycle();
+
+        // reduce sampling for image, too
+        float newWidth;
+        if (width>height) {
+            sampleSizeF = (float) width / (float) IMAGEMAXSIZE;
+            newHeight = height/sampleSizeF;
+            newWidth = IMAGEMAXSIZE;
+        }
+        else {
+            sampleSizeF = (float) height / (float) IMAGEMAXSIZE;
+            newHeight = IMAGEMAXSIZE;
+            newWidth = width/sampleSizeF;
+        }
+        image =  Bitmap.createScaledBitmap(image, (int)newWidth, (int)newHeight, false);
+        stream = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 53, stream);
+        byte[] imageBytes = stream.toByteArray();
 
         imageAndThumbNail[0] = imageBytes;
         imageAndThumbNail[1] = thumbnailBytes;
