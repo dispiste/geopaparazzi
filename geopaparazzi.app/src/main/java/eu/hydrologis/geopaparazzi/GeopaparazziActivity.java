@@ -4,7 +4,11 @@
 package eu.hydrologis.geopaparazzi;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,6 +25,10 @@ import android.widget.ImageView;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import eu.geopaparazzi.library.database.GPLog;
 import eu.geopaparazzi.library.forms.TagsManager;
@@ -50,6 +59,16 @@ import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_DATABASE_T
 public class GeopaparazziActivity extends AppCompatActivity implements IApplicationChangeListener {
     private IChainedPermissionHelper permissionHelper = new PermissionWriteStorage();
     private GeopaparazziActivityFragment geopaparazziActivityFragment;
+
+    // CMI
+    public static final String ACTION_PICK_PLUGIN = "androidsrc.intent.action.PICK_PLUGIN";
+    static final String KEY_PKG = "pkg";
+    static final String KEY_SERVICENAME = "servicename";
+    static final String KEY_ACTIONS = "actions";
+    static final String KEY_CATEGORIES = "categories";
+    static final String BUNDLE_EXTRAS_CATEGORY = "category";
+
+    static final String LOG_TAG = "PluginApp";
 
     // configure the GeopaparazziActivity
     @Override
@@ -82,7 +101,61 @@ public class GeopaparazziActivity extends AppCompatActivity implements IApplicat
             checkIncomingUrl();
             checkAvailableProfiles();
         }
+        initPlugins();
+    }
 
+    private void initPlugins() {
+        ArrayList<HashMap<String, String>> services = new ArrayList<HashMap<String, String>>();
+        ArrayList<String> categories = new ArrayList<String>();
+
+        PackageManager packageManager = getPackageManager();
+        //String category = "androidsrc.intent.category.ADD_PLUGIN";
+        Intent baseIntent = new Intent("androidsrc.intent.action.PICK_PLUGIN");
+        baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
+        List<ResolveInfo> list = packageManager.queryIntentServices(baseIntent,
+                PackageManager.GET_RESOLVED_FILTER);
+        for (int i = 0; i < list.size(); ++i) {
+            ResolveInfo info = list.get(i);
+            ServiceInfo sinfo = info.serviceInfo;
+            IntentFilter filter = info.filter;
+            Log.d(LOG_TAG, "fillPluginList: i: " + i + "; sinfo: " + sinfo + ";filter: " + filter);
+            if (sinfo != null) {
+                HashMap<String, String> item = new HashMap<String, String>();
+                item.put(KEY_PKG, sinfo.packageName);
+                item.put(KEY_SERVICENAME, sinfo.name);
+                String firstCategory = null;
+                if (filter != null) {
+                    StringBuilder actions = new StringBuilder();
+                    for (Iterator<String> actionIterator = filter.actionsIterator(); actionIterator.hasNext(); ) {
+                        String action = actionIterator.next();
+                        if (actions.length() > 0)
+                            actions.append(",");
+                        actions.append(action);
+                    }
+                    StringBuilder categoryList = new StringBuilder();
+                    for (Iterator<String> categoryIterator = filter.categoriesIterator();
+                         categoryIterator.hasNext(); ) {
+                        String category = categoryIterator.next();
+                        if (firstCategory == null)
+                            firstCategory = category;
+                        if (categoryList.length() > 0)
+                            categoryList.append(",");
+                        categoryList.append(category);
+                    }
+                    item.put(KEY_ACTIONS, new String(actions));
+                    item.put(KEY_CATEGORIES, new String(categoryList));
+                } else {
+                    item.put(KEY_ACTIONS, "<null>");
+                    item.put(KEY_CATEGORIES, "<null>");
+                }
+                if (firstCategory == null)
+                    firstCategory = "";
+                categories.add(firstCategory);
+                services.add(item);
+            }
+        }
+        Log.d(LOG_TAG, "services: " + services);
+        Log.d(LOG_TAG, "categories: " + categories);
     }
 
     private void init() {
