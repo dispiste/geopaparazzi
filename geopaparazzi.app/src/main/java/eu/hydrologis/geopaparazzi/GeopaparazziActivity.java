@@ -3,8 +3,11 @@
 // GeopaparazziActivityFragment and SettingsActivityFragment on a tablet
 package eu.hydrologis.geopaparazzi;
 
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -13,6 +16,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +26,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 
@@ -48,7 +54,9 @@ import eu.hydrologis.geopaparazzi.utilities.IApplicationChangeListener;
 import eu.hydrologis.geopaparazzi.ui.fragments.GeopaparazziActivityFragment;
 import eu.geopaparazzi.library.permissions.IChainedPermissionHelper;
 import eu.geopaparazzi.library.permissions.PermissionWriteStorage;
+import eu.hydrologis.geopaparazzi.extension.types.IMenuEntry;
 
+import static eu.geopaparazzi.library.routing.openrouteservice.OpenRouteServiceHandler.Language.it;
 import static eu.geopaparazzi.library.util.LibraryConstants.PREFS_KEY_DATABASE_TO_LOAD;
 
 /**
@@ -117,6 +125,7 @@ public class GeopaparazziActivity extends AppCompatActivity implements IApplicat
         for (int i = 0; i < list.size(); ++i) {
             ResolveInfo info = list.get(i);
             ServiceInfo sinfo = info.serviceInfo;
+            getPluginText(sinfo.packageName);
             IntentFilter filter = info.filter;
             Log.d(LOG_TAG, "fillPluginList: i: " + i + "; sinfo: " + sinfo + ";filter: " + filter);
             if (sinfo != null) {
@@ -157,6 +166,37 @@ public class GeopaparazziActivity extends AppCompatActivity implements IApplicat
         Log.d(LOG_TAG, "services: " + services);
         Log.d(LOG_TAG, "categories: " + categories);
     }
+
+    private void getPluginText(String servicePackage) {
+        Intent it = new Intent();
+        it.setAction("androidsrc.intent.action.PICK_PLUGIN");
+        it.setPackage(servicePackage);
+        ServiceConnection addServiceConnection = new ServiceConnection() {
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    // TODO Auto-generated method stub
+
+                    Log.d("IRemote", "Binding - Service disconnected");
+                }
+
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    // TODO Auto-generated method stub
+                    IMenuEntry plugin = IMenuEntry.Stub.asInterface((IBinder) service);
+
+                    try {
+                        String text = plugin.getLabel();
+                        Log.d("IRemote", "Binding is done - Service connected. Label:" + text);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+        bindService(it, addServiceConnection, Service.BIND_AUTO_CREATE);
+    }
+
+
 
     private void init() {
 

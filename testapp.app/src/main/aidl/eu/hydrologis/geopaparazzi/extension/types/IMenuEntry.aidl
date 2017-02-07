@@ -14,4 +14,9 @@ interface IMenuEntry {
      * Returns the icon
      */
     byte[] getIcon();
+
+    /**
+     * Gets the name of the action to launch when the entry is clicked
+     */
+    String getAction();
 }
