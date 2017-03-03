@@ -11,3 +11,6 @@ include ':geopaparazzi_projects_import_plugins'
 project(':geopaparazzi_projects_import_plugins').projectDir = new File('plugins/geopaparazzi_projects_import_plugins/')
 include ':geopaparazzi_projects_export_plugins'
 project(':geopaparazzi_projects_export_plugins').projectDir = new File('plugins/geopaparazzi_projects_export_plugins/')
+include ':plugin_gvsigol_io'
+project(':plugin_gvsigol_io').projectDir = new File('../gvsig-mobile/plugin_gvsigol_io')
+
