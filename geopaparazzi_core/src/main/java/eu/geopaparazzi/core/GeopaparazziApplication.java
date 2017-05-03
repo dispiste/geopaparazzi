@@ -45,7 +45,7 @@ public class GeopaparazziApplication extends GPApplication {
         super.onCreate();
 
         ACRAConfiguration config = ACRA.getConfig();
-        config.setMailTo("feedback@geopaparazzi.eu");
+        config.setMailTo("gvsigonline@scolab.es");
         config.setCustomReportContent(new ReportField[]{//
 /*    */ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, //
                 ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL, //
