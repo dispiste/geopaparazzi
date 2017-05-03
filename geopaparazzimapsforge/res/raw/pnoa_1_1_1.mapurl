@@ -1,0 +1,10 @@
+url=http://www.ign.es/wms-inspire/pnoa-ma?VERSION=1.1.1&LAYERS=OI.OrthoimageCoverage&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&REQUEST=GetMap&STYLES=&EXCEPTIONS=application/vnd.ogc.se_inimage&SRS=EPSG:4326&BBOX=XXX,YYY,XXX,YYY&WIDTH=256&HEIGHT=256
+minzoom=0
+maxzoom=22
+center=-0.5445 39.605000000000004
+type=wms
+format=png
+defaultzoom=13
+mbtiles=defaulttiles/_pnoa_1_1_1.mbtiles
+description=PNOA
+

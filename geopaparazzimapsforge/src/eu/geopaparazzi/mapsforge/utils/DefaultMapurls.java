@@ -45,7 +45,11 @@ public class DefaultMapurls {
         /** */
         opencycle(eu.geopaparazzi.mapsforge.R.raw.opencycle),
         /** */
-        mapquest(eu.geopaparazzi.mapsforge.R.raw.mapquest);
+        mapquest(eu.geopaparazzi.mapsforge.R.raw.mapquest),
+
+        pnoa(eu.geopaparazzi.mapsforge.R.raw.pnoa_1_1_1),
+
+        osmgol(eu.geopaparazzi.mapsforge.R.raw.osmgol);
 
         private int resourceId;
 
