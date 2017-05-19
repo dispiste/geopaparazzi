@@ -86,8 +86,17 @@ public class CameraDbActivity extends AbstractCameraActivity {
 
     @Override
     protected void doSaveData() {
-        final String imgPath = imageFilePath;
-        storeImageBlob(imgPath);
+        try{
+            final String imgPath = imageFilePath;
+            storeImageBlob(imgPath);
+            File f = new File(imgPath);
+            if (f.exists()) {
+                f.delete();
+            }
+        } catch (Exception e) {
+            GPLog.error(this, "ERROR", e);
+            // FIXME: properly manage errors
+        }
         /*
         // FIXME: the activity fails when saving data using an async task
         StringAsyncTask saveDataTask = new StringAsyncTask(this) {
@@ -131,14 +140,9 @@ public class CameraDbActivity extends AbstractCameraActivity {
      * @param imgPath
      */
     protected void storeImageBlob(String imgPath) {
-        try{
-            byte[][] imageAndThumb = ImageUtilities.getImageAndThumbnailFromPath(imgPath, 10);
-            BlobResource res = new BlobResource(imageAndThumb[0], "", AbstractResource.ResourceType.BLOB_IMAGE);
-            res.setThumbnail(imageAndThumb[1]);
-            storage.insertResource(rowId, res);
-        } catch (Exception e) {
-            GPLog.error(this, "ERROR", e);
-            // FIXME: properly manage errors
-        }
+        byte[][] imageAndThumb = ImageUtilities.getImageAndThumbnailFromPath(imgPath, 63, 10);
+        BlobResource res = new BlobResource(imageAndThumb[0], "", AbstractResource.ResourceType.BLOB_IMAGE);
+        res.setThumbnail(imageAndThumb[1]);
+        storage.insertResource(rowId, res);
     }
 }

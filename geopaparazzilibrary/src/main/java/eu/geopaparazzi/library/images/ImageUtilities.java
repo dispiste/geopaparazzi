@@ -38,6 +38,7 @@ import eu.geopaparazzi.library.util.TimeUtilities;
 public class ImageUtilities {
     public static final int MAXBLOBSIZE = 1900000;
     public static final int THUMBNAILWIDTH = 100;
+    public static final int IMAGEWIDTH = 1200;
 
     public static String getSketchImageName(Date date) {
         if (date == null)
@@ -121,10 +122,22 @@ public class ImageUtilities {
      * @return the image and thumbnail data or null.
      */
     public static byte[][] getImageAndThumbnailFromPath(String imageFilePath, int tryCount) {
+        return getImageAndThumbnailFromPath(imageFilePath, 90, tryCount);
+    }
+
+    /**
+     * Get an image and thumbnail from a file by its path.
+     *
+     * @param imageFilePath the image path.
+     * @param tryCount      times to try in 300 millis loop, in case the image is
+     *                      not yet on disk. (ugly but no other way right now)
+     * @return the image and thumbnail data or null.
+     */
+    public static byte[][] getImageAndThumbnailFromPath(String imageFilePath, int quality, int tryCount) {
         byte[][] imageAndThumbNail = new byte[2][];
 
         // first read full image and check existence
-        Bitmap image = BitmapFactory.decodeFile(imageFilePath);
+        Bitmap image = decodeSampledBitmapFromFile(imageFilePath, IMAGEWIDTH, IMAGEWIDTH);
         int count = 0;
         while (image == null && ++count < tryCount) {
             try {
@@ -132,7 +145,7 @@ public class ImageUtilities {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            image = BitmapFactory.decodeFile(imageFilePath);
+            image = decodeSampledBitmapFromFile(imageFilePath, IMAGEWIDTH, IMAGEWIDTH);
         }
         if (image == null) return null;
 
@@ -147,26 +160,44 @@ public class ImageUtilities {
                     image.getHeight(), matrix, true);
         }
 
+        // define sampling for thumbnail
         int width = image.getWidth();
         int height = image.getHeight();
-
-        // define sampling for thumbnail
-        float sampleSizeF = (float) width / (float) THUMBNAILWIDTH;
-        float newHeight = height/sampleSizeF;
-        Bitmap thumbnail =  Bitmap.createScaledBitmap(image, THUMBNAILWIDTH, (int)newHeight, false);
+        int[] newDim = getImageResolution(height, width, THUMBNAILWIDTH);
+        Bitmap thumbnail =  Bitmap.createScaledBitmap(image, newDim[1], newDim[0], false);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+        image.compress(Bitmap.CompressFormat.JPEG, quality, stream);
         byte[] imageBytes = stream.toByteArray();
 
         stream = new ByteArrayOutputStream();
-        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+        thumbnail.compress(Bitmap.CompressFormat.JPEG, quality, stream);
         byte[] thumbnailBytes = stream.toByteArray();
 
         imageAndThumbNail[0] = imageBytes;
         imageAndThumbNail[1] = thumbnailBytes;
         return imageAndThumbNail;
     }
+
+    /**
+     * Computes a downscaled image heigth and width, ensuring both dimensions become
+     * smaller or equal to maxSize, while keeping aspect ratio.
+     *
+     * @param height the original image height
+     * @param width the original image width
+     * @param maxSize the maximum width and height for the downscaled image
+     * @return an array of resolutions containing the new heigth and width
+     */
+    private static int[] getImageResolution(int height, int width, int maxSize) {
+        // define sampling for thumbnail
+        float sampleWidthF = (float) width / (float) maxSize;
+        float sampleHeighF = (float) height / (float) maxSize;
+        float factor = Math.max(sampleHeighF, sampleWidthF);
+        float newHeight = height/factor;
+        float newWidth = width/factor;
+        return new int[] {(int)newHeight, (int) newWidth};
+    }
+
 
 
     public static Bitmap getScaledBitmap(int targetW, int targetH, String imagePath) {
